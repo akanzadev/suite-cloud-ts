@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "@hitc/netsuite-types": "^2023.2.10",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "ts:compile": "tsc",
+    "ts:watch": "tsc -w"
+  }
+}
