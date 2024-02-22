@@ -30,17 +30,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
 define(["require", "exports", "N/log"], function (require, exports, log) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.beforeLoad = exports.beforeSubmit = exports.afterSubmit = void 0;
+    exports.beforeLoad = void 0;
     log = __importStar(log);
-    function afterSubmit(context) { }
-    exports.afterSubmit = afterSubmit;
-    function beforeSubmit(context) { }
-    exports.beforeSubmit = beforeSubmit;
     function beforeLoad(context) {
-        log.debug({ title: "Context", details: context.type });
+        log.debug({ title: 'Context', details: context.type });
         const recordObj = context.newRecord;
-        const status = recordObj.getValue("custrecord_3k_master_ts_desc");
-        log.debug({ title: "Status", details: status });
+        const status = recordObj.getValue('custrecord_3k_master_ts_desc');
+        log.debug({ title: 'Status', details: status });
     }
     exports.beforeLoad = beforeLoad;
 });

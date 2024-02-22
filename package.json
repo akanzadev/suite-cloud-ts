@@ -1,10 +1,23 @@
 {
-  "devDependencies": {
-    "@hitc/netsuite-types": "^2023.2.10",
-    "typescript": "^5.3.3"
-  },
-  "scripts": {
-    "ts:compile": "tsc",
-    "ts:watch": "tsc -w"
-  }
+    "version": "1.0.0",
+    "name": "netsuite-typescript-starter",
+    "description": "A starter project for developing SuiteScript in TypeScript",
+    "keywords": [
+        "netsuite",
+        "typescript",
+        "starter"
+    ],
+    "scripts": {
+        "ts:compile": "tsc",
+        "ts:watch": "tsc -w"
+    },
+    "devDependencies": {
+        "@hitc/netsuite-types": "^2023.2.10",
+        "@typescript-eslint/eslint-plugin": "^7.0.2",
+        "@typescript-eslint/parser": "^7.0.2",
+        "eslint": "^8.56.0",
+        "eslint-config-prettier": "^9.1.0",
+        "prettier": "3.2.5",
+        "typescript": "^5.3.3"
+    }
 }
