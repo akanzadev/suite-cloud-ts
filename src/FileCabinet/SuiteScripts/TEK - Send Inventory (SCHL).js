@@ -27,14 +27,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-define(["require", "exports", "N/https", "N/log", "N/runtime", "N/format"], function (require, exports, https, log, runtime, format) {
+define(["require", "exports", "N/log", "N/runtime"], function (require, exports, log, runtime) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.execute = void 0;
-    https = __importStar(https);
     log = __importStar(log);
     runtime = __importStar(runtime);
-    format = __importStar(format);
     /**
      * @description Get all Inventory Items
      * @param {EntryPoints.MapReduce.getInputDataContext} context
@@ -45,30 +43,39 @@ define(["require", "exports", "N/https", "N/log", "N/runtime", "N/format"], func
             log.debug('🚀 ~ file: TEK - Send Inventory (SCHL).ts:35 ~ execute ~ context:', context);
             const body = JSON.parse(runtime
                 .getCurrentScript()
-                .getParameter({ name: 'custscript1' })
+                .getParameter({ name: 'custscript_tek_send_inv' })
                 .toString());
             log.debug('🚀 ~ file: TEK - Send Inventory (SCHL).ts:44 ~ execute ~ body:', body);
-            const price = format.format({
-                value: '564.564,00',
-                type: format.Type.CURRENCY,
-            });
-            log.debug('🚀 ~ file: TEK - Send Inventory (SCHL).ts:50 ~ execute ~ price:', price);
-            format.parse({
-                value: price,
-                type: format.Type.CURRENCY,
-            });
-            const price2 = format.format({
-                value: '564,564.00',
-                type: format.Type.CURRENCY,
-            });
-            log.debug('🚀 ~ file: TEK - Send Inventory (SCHL).ts:60 ~ execute ~ price2:', price2);
-            const response = https.get({
-                url: 'https://google.com',
-            });
-            log.debug('🚀 ~ file: TEK - Send Inventory (SCHL).ts:65 ~ execute ~ response:', response);
+            // const price = format.format({
+            //     value: '564.564,00',
+            //     type: format.Type.CURRENCY,
+            // })
+            // log.debug(
+            //     '🚀 ~ file: TEK - Send Inventory (SCHL).ts:50 ~ execute ~ price:',
+            //     price
+            // )
+            // format.parse({
+            //     value: price,
+            //     type: format.Type.CURRENCY,
+            // })
+            // const price2 = format.format({
+            //     value: '564,564.00',
+            //     type: format.Type.CURRENCY,
+            // })
+            // log.debug(
+            //     '🚀 ~ file: TEK - Send Inventory (SCHL).ts:60 ~ execute ~ price2:',
+            //     price2
+            // )
+            // const response = https.get({
+            //     url: 'https://google.com',
+            // })
+            // log.debug(
+            //     '🚀 ~ file: TEK - Send Inventory (SCHL).ts:65 ~ execute ~ response:',
+            //     response
+            // )
         }
         catch (e) {
-            log.error({ title: e.name, details: e.message });
+            log.error('execute', e);
         }
     }
     exports.execute = execute;

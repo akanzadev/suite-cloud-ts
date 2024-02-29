@@ -8,6 +8,7 @@
         "noUnusedLocals": false,
         "moduleResolution": "node",
         "newLine": "LF",
+        "strict": true,
         "baseUrl": ".",
         "lib": ["ESNext", "dom"],
         "paths": {

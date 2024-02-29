@@ -6,10 +6,10 @@
  */
 
 import { EntryPoints } from 'N/types'
-import * as https from 'N/https'
+// import * as https from 'N/https'
 import * as log from 'N/log'
 import * as runtime from 'N/runtime'
-import * as format from 'N/format'
+// import * as format from 'N/format'
 
 interface InventoryItem {
     internalId: string
@@ -40,7 +40,7 @@ export function execute(context: EntryPoints.Scheduled.executeContext): void {
         const body: MapResult[] = JSON.parse(
             runtime
                 .getCurrentScript()
-                .getParameter({ name: 'custscript1' })
+                .getParameter({ name: 'custscript_tek_send_inv' })
                 .toString()
         )
         log.debug(
@@ -48,37 +48,37 @@ export function execute(context: EntryPoints.Scheduled.executeContext): void {
             body
         )
 
-        const price = format.format({
-            value: '564.564,00',
-            type: format.Type.CURRENCY,
-        })
-        log.debug(
-            '🚀 ~ file: TEK - Send Inventory (SCHL).ts:50 ~ execute ~ price:',
-            price
-        )
-        format.parse({
-            value: price,
-            type: format.Type.CURRENCY,
-        })
+        // const price = format.format({
+        //     value: '564.564,00',
+        //     type: format.Type.CURRENCY,
+        // })
+        // log.debug(
+        //     '🚀 ~ file: TEK - Send Inventory (SCHL).ts:50 ~ execute ~ price:',
+        //     price
+        // )
+        // format.parse({
+        //     value: price,
+        //     type: format.Type.CURRENCY,
+        // })
 
-        const price2 = format.format({
-            value: '564,564.00',
-            type: format.Type.CURRENCY,
-        })
-        log.debug(
-            '🚀 ~ file: TEK - Send Inventory (SCHL).ts:60 ~ execute ~ price2:',
-            price2
-        )
+        // const price2 = format.format({
+        //     value: '564,564.00',
+        //     type: format.Type.CURRENCY,
+        // })
+        // log.debug(
+        //     '🚀 ~ file: TEK - Send Inventory (SCHL).ts:60 ~ execute ~ price2:',
+        //     price2
+        // )
 
-        const response = https.get({
-            url: 'https://google.com',
-        })
-        log.debug(
-            '🚀 ~ file: TEK - Send Inventory (SCHL).ts:65 ~ execute ~ response:',
-            response
-        )
+        // const response = https.get({
+        //     url: 'https://google.com',
+        // })
+        // log.debug(
+        //     '🚀 ~ file: TEK - Send Inventory (SCHL).ts:65 ~ execute ~ response:',
+        //     response
+        // )
     } catch (e) {
-        log.error({ title: e.name, details: e.message })
+        log.error('execute', e)
     }
 }
 
