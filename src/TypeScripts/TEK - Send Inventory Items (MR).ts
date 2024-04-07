@@ -12,6 +12,31 @@ import * as file from 'N/file'
 import * as runtime from 'N/runtime'
 import * as task from 'N/task'
 
+class Schedule {
+    private _scriptId: string
+    private _deploymentId: string
+    private _params: { [key: string]: string | number | boolean }
+
+    constructor(
+        scriptId: string,
+        deploymentId: string,
+        params: { [key: string]: string | number | boolean }
+    ) {
+        this._scriptId = scriptId
+        this._deploymentId = deploymentId
+        this._params = params
+    }
+
+    public execute(): void {
+        task.create({
+            taskType: task.TaskType.SCHEDULED_SCRIPT,
+            scriptId: this._scriptId,
+            deploymentId: this._deploymentId,
+            params: this._params,
+        }).submit()
+    }
+}
+
 interface PriceInterval {
     interval: string
     unitPrice: string
@@ -146,9 +171,80 @@ export function summarize(
                     ),
                 }
             })
+
+        const itemsParsed2 = oks.map((ok) => {
+            const {
+                id,
+                name,
+                displayName,
+                description,
+                type,
+                basePrice,
+                currencies,
+            } = ok.item
+
+            const parsedCurrencies = Object.values(currencies).map(
+                (currency) => {
+                    const { id, currency: currencyText, priceLevels } = currency
+
+                    const parsedPriceLevels = Object.values(priceLevels).map(
+                        (priceLevel) => {
+                            const {
+                                id,
+                                priceLevel: level,
+                                priceIntervals,
+                            } = priceLevel
+                            return { id, priceLevel: level, priceIntervals }
+                        }
+                    )
+
+                    return {
+                        id,
+                        currency: currencyText,
+                        priceLevels: parsedPriceLevels,
+                    }
+                }
+            )
+
+            return {
+                id,
+                name,
+                displayName,
+                description,
+                type,
+                basePrice,
+                currencies: parsedCurrencies,
+            }
+        })
+
+        const itemsParsed3 = oks.map(({ item }) => ({
+            ...item,
+            currencies: Object.values(item.currencies).map(
+                ({ id, currency, priceLevels }) => ({
+                    id,
+                    currency,
+                    priceLevels: Object.values(priceLevels).map(
+                        ({ id, priceLevel, priceIntervals }) => ({
+                            id,
+                            priceLevel,
+                            priceIntervals,
+                        })
+                    ),
+                })
+            ),
+        }))
+
         log.debug(
             '🚀 ~ file: TEK - Send Inventory Items (MR).ts:151 ~ itemsParsed:',
             itemsParsed[0]
+        )
+        log.debug(
+            '🚀 ~ file: TEK - Send Inventory Items (MR).ts:151 ~ itemsParsed2:',
+            itemsParsed2[0]
+        )
+        log.debug(
+            '🚀 ~ file: TEK - Send Inventory Items (MR).ts:151 ~ itemsParsed3:',
+            itemsParsed3[0]
         )
 
         const folderId = runtime
@@ -183,16 +279,23 @@ export function summarize(
             deploymentId
         )
 
-        const taskExecuted =
-            fileId &&
-            task
-                .create({
-                    taskType: task.TaskType.SCHEDULED_SCRIPT,
-                    scriptId,
-                    deploymentId,
-                    params: { custscript1: fileId.toString() },
-                })
-                .submit()
+        if (!fileId) throw new Error('No se pudo guardar el archivo')
+
+        const taskExecuted = new Schedule(scriptId, deploymentId, {
+            custscript1: fileId.toString(),
+        }).execute()
+
+        // const taskExecuted =
+        //     fileId &&
+        //     task
+        //         .create({
+        //             taskType: task.TaskType.SCHEDULED_SCRIPT,
+        //             scriptId,
+        //             deploymentId,
+        //             params: { custscript1: fileId.toString() },
+        //         })
+        //         .submit()
+
         log.debug(
             '🚀 ~ file: TEK - Send Inventory Items (MR).ts:135 ~ taskExecuted:',
             taskExecuted
