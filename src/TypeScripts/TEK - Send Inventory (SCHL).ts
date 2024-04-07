@@ -40,7 +40,7 @@ export function execute(context: EntryPoints.Scheduled.executeContext): void {
         const body: MapResult[] = JSON.parse(
             runtime
                 .getCurrentScript()
-                .getParameter({ name: 'custscript_tek_send_inv' })
+                .getParameter({ name: 'custscript_tek_send_inv_file_id' })
                 .toString()
         )
         log.debug(

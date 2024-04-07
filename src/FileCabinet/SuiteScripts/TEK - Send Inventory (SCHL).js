@@ -43,7 +43,7 @@ define(["require", "exports", "N/log", "N/runtime"], function (require, exports,
             log.debug('🚀 ~ file: TEK - Send Inventory (SCHL).ts:35 ~ execute ~ context:', context);
             const body = JSON.parse(runtime
                 .getCurrentScript()
-                .getParameter({ name: 'custscript_tek_send_inv' })
+                .getParameter({ name: 'custscript_tek_send_inv_file_id' })
                 .toString());
             log.debug('🚀 ~ file: TEK - Send Inventory (SCHL).ts:44 ~ execute ~ body:', body);
             // const price = format.format({

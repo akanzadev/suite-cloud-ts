@@ -44,12 +44,12 @@ interface PriceInterval {
 
 interface PriceLevel {
     id: string
-    priceLevel: string
+    name: string
     priceIntervals: PriceInterval[]
 }
 interface Currency {
     id: string
-    currency: string
+    name: string
     priceLevels: {
         [priceLevelId: string]: PriceLevel
     }
@@ -155,13 +155,13 @@ export function summarize(
                         (currency) => {
                             return {
                                 id: currency.id,
-                                currency: currency.currency,
+                                name: currency.name,
                                 priceLevels: Object.values(
                                     currency.priceLevels
                                 ).map((priceLevel) => {
                                     return {
                                         id: priceLevel.id,
-                                        priceLevel: priceLevel.priceLevel,
+                                        name: priceLevel.name,
                                         priceIntervals:
                                             priceLevel.priceIntervals,
                                     }
@@ -185,22 +185,18 @@ export function summarize(
 
             const parsedCurrencies = Object.values(currencies).map(
                 (currency) => {
-                    const { id, currency: currencyText, priceLevels } = currency
+                    const { id, name, priceLevels } = currency
 
                     const parsedPriceLevels = Object.values(priceLevels).map(
                         (priceLevel) => {
-                            const {
-                                id,
-                                priceLevel: level,
-                                priceIntervals,
-                            } = priceLevel
-                            return { id, priceLevel: level, priceIntervals }
+                            const { id, name, priceIntervals } = priceLevel
+                            return { id, name, priceIntervals }
                         }
                     )
 
                     return {
                         id,
-                        currency: currencyText,
+                        name,
                         priceLevels: parsedPriceLevels,
                     }
                 }
@@ -220,13 +216,13 @@ export function summarize(
         const itemsParsed3 = oks.map(({ item }) => ({
             ...item,
             currencies: Object.values(item.currencies).map(
-                ({ id, currency, priceLevels }) => ({
+                ({ id, name, priceLevels }) => ({
                     id,
-                    currency,
+                    name,
                     priceLevels: Object.values(priceLevels).map(
-                        ({ id, priceLevel, priceIntervals }) => ({
+                        ({ id, name, priceIntervals }) => ({
                             id,
-                            priceLevel,
+                            name,
                             priceIntervals,
                         })
                     ),
@@ -281,8 +277,8 @@ export function summarize(
 
         if (!fileId) throw new Error('No se pudo guardar el archivo')
 
-        const taskExecuted = new Schedule(scriptId, deploymentId, {
-            custscript1: fileId.toString(),
+        new Schedule(scriptId, deploymentId, {
+            custscript_tek_send_inv_file_id: fileId.toString(),
         }).execute()
 
         // const taskExecuted =
@@ -292,14 +288,9 @@ export function summarize(
         //             taskType: task.TaskType.SCHEDULED_SCRIPT,
         //             scriptId,
         //             deploymentId,
-        //             params: { custscript1: fileId.toString() },
+        //             params: { custscript_tek_send_inv_file_id: fileId.toString() },
         //         })
         //         .submit()
-
-        log.debug(
-            '🚀 ~ file: TEK - Send Inventory Items (MR).ts:135 ~ taskExecuted:',
-            taskExecuted
-        )
     } catch (e) {
         log.error('summarize', e)
     }
@@ -374,7 +365,7 @@ function _getInventoryItems(): InventoryItems {
                     const priceLevelId = auxResult[i]
                         .getValue(columns[8])
                         .toString()
-                    const priceLevel = auxResult[i]
+                    const priceLevelText = auxResult[i]
                         .getValue(columns[9])
                         .toString()
                     const unitPrice = auxResult[i]
@@ -388,7 +379,7 @@ function _getInventoryItems(): InventoryItems {
                     if (!rta[id].currencies[currencyId]) {
                         rta[id].currencies[currencyId] = {
                             id: currencyId,
-                            currency: currencyText,
+                            name: currencyText,
                             priceLevels: {},
                         }
                     }
@@ -403,7 +394,7 @@ function _getInventoryItems(): InventoryItems {
                             priceLevelId
                         ] = {
                             id: priceLevelId,
-                            priceLevel: priceLevel,
+                            name: priceLevelText,
                             priceIntervals: [{ interval, unitPrice }],
                         }
                     } else {

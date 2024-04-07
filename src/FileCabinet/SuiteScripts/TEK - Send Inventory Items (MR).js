@@ -36,6 +36,21 @@ define(["require", "exports", "N/log", "N/search", "N/file", "N/runtime", "N/tas
     file = __importStar(file);
     runtime = __importStar(runtime);
     task = __importStar(task);
+    class Schedule {
+        constructor(scriptId, deploymentId, params) {
+            this._scriptId = scriptId;
+            this._deploymentId = deploymentId;
+            this._params = params;
+        }
+        execute() {
+            task.create({
+                taskType: task.TaskType.SCHEDULED_SCRIPT,
+                scriptId: this._scriptId,
+                deploymentId: this._deploymentId,
+                params: this._params,
+            }).submit();
+        }
+    }
     /**
      * @description Get all Inventory Items
      * @param {EntryPoints.MapReduce.getInputDataContext} context
@@ -105,11 +120,11 @@ define(["require", "exports", "N/log", "N/search", "N/file", "N/runtime", "N/tas
                     currencies: Object.values(item.currencies).map((currency) => {
                         return {
                             id: currency.id,
-                            currency: currency.currency,
+                            name: currency.name,
                             priceLevels: Object.values(currency.priceLevels).map((priceLevel) => {
                                 return {
                                     id: priceLevel.id,
-                                    priceLevel: priceLevel.priceLevel,
+                                    name: priceLevel.name,
                                     priceIntervals: priceLevel.priceIntervals,
                                 };
                             }),
@@ -117,7 +132,42 @@ define(["require", "exports", "N/log", "N/search", "N/file", "N/runtime", "N/tas
                     }),
                 };
             });
+            const itemsParsed2 = oks.map((ok) => {
+                const { id, name, displayName, description, type, basePrice, currencies, } = ok.item;
+                const parsedCurrencies = Object.values(currencies).map((currency) => {
+                    const { id, name, priceLevels } = currency;
+                    const parsedPriceLevels = Object.values(priceLevels).map((priceLevel) => {
+                        const { id, name, priceIntervals } = priceLevel;
+                        return { id, name, priceIntervals };
+                    });
+                    return {
+                        id,
+                        name,
+                        priceLevels: parsedPriceLevels,
+                    };
+                });
+                return {
+                    id,
+                    name,
+                    displayName,
+                    description,
+                    type,
+                    basePrice,
+                    currencies: parsedCurrencies,
+                };
+            });
+            const itemsParsed3 = oks.map(({ item }) => (Object.assign(Object.assign({}, item), { currencies: Object.values(item.currencies).map(({ id, name, priceLevels }) => ({
+                    id,
+                    name,
+                    priceLevels: Object.values(priceLevels).map(({ id, name, priceIntervals }) => ({
+                        id,
+                        name,
+                        priceIntervals,
+                    })),
+                })) })));
             log.debug('🚀 ~ file: TEK - Send Inventory Items (MR).ts:151 ~ itemsParsed:', itemsParsed[0]);
+            log.debug('🚀 ~ file: TEK - Send Inventory Items (MR).ts:151 ~ itemsParsed2:', itemsParsed2[0]);
+            log.debug('🚀 ~ file: TEK - Send Inventory Items (MR).ts:151 ~ itemsParsed3:', itemsParsed3[0]);
             const folderId = runtime
                 .getCurrentScript()
                 .getParameter({ name: 'custscript_tek_send_inv_items_folder' })
@@ -134,16 +184,21 @@ define(["require", "exports", "N/log", "N/search", "N/file", "N/runtime", "N/tas
                 .getParameter({ name: 'custscript_tek_send_inv_items_deploy_sch' })
                 .toString();
             log.debug('🚀 ~ file: TEK - Send Inventory Items (MR).ts:174 ~ deploymentId:', deploymentId);
-            const taskExecuted = fileId &&
-                task
-                    .create({
-                    taskType: task.TaskType.SCHEDULED_SCRIPT,
-                    scriptId,
-                    deploymentId,
-                    params: { custscript1: fileId.toString() },
-                })
-                    .submit();
-            log.debug('🚀 ~ file: TEK - Send Inventory Items (MR).ts:135 ~ taskExecuted:', taskExecuted);
+            if (!fileId)
+                throw new Error('No se pudo guardar el archivo');
+            new Schedule(scriptId, deploymentId, {
+                custscript_tek_send_inv_file_id: fileId.toString(),
+            }).execute();
+            // const taskExecuted =
+            //     fileId &&
+            //     task
+            //         .create({
+            //             taskType: task.TaskType.SCHEDULED_SCRIPT,
+            //             scriptId,
+            //             deploymentId,
+            //             params: { custscript_tek_send_inv_file_id: fileId.toString() },
+            //         })
+            //         .submit()
         }
         catch (e) {
             log.error('summarize', e);
@@ -212,7 +267,7 @@ define(["require", "exports", "N/log", "N/search", "N/file", "N/runtime", "N/tas
                         const priceLevelId = auxResult[i]
                             .getValue(columns[8])
                             .toString();
-                        const priceLevel = auxResult[i]
+                        const priceLevelText = auxResult[i]
                             .getValue(columns[9])
                             .toString();
                         const unitPrice = auxResult[i]
@@ -225,7 +280,7 @@ define(["require", "exports", "N/log", "N/search", "N/file", "N/runtime", "N/tas
                         if (!rta[id].currencies[currencyId]) {
                             rta[id].currencies[currencyId] = {
                                 id: currencyId,
-                                currency: currencyText,
+                                name: currencyText,
                                 priceLevels: {},
                             };
                         }
@@ -233,7 +288,7 @@ define(["require", "exports", "N/log", "N/search", "N/file", "N/runtime", "N/tas
                         if (!rta[id].currencies[currencyId].priceLevels[priceLevelId]) {
                             rta[id].currencies[currencyId].priceLevels[priceLevelId] = {
                                 id: priceLevelId,
-                                priceLevel: priceLevel,
+                                name: priceLevelText,
                                 priceIntervals: [{ interval, unitPrice }],
                             };
                         }
